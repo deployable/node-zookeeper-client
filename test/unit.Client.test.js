@@ -1,5 +1,5 @@
 
-const Client = require('../../lib/Client')
+const Client = require('../lib/Client')
 
 describe('Client', function(){
 
@@ -10,7 +10,6 @@ describe('Client', function(){
       it('should create a client instance', function () {
         expect( new Client('test') ).to.be.an.instanceof( Client )
       })
-
     })
 
     describe('', function(){
@@ -24,9 +23,6 @@ describe('Client', function(){
       it('should create a client instance', function () {
         client.emit('state','test')
       })
-
     })
-
   })
-
 })

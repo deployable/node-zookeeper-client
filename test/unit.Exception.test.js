@@ -5,78 +5,71 @@
  * for terms.
  */
 
-/*global describe, it, beforeEach, before, after */
-
-var expect = require('chai').expect;
-var Exception = require('../../lib/Exception.js');
+const Exception = require('../lib/Exception')
 
 
 describe('Exception', function () {
-    describe('create', function () {
-        it('should only accept number code', function () {
-            expect(function () {
-                Exception.create('zzz');
-            }).to.throw('must be a number');
-            expect(function () {
-                Exception.create();
-            }).to.throw('must be a number');
-            expect(function () {
-                Exception.create(null);
-            }).to.throw('must be a number');
-        });
 
-        it('should only accept predefined code', function () {
-            expect(function () {
-                Exception.create(111111);
-            }).to.throw('Unknown code');
-            expect(function () {
-                Exception.create(-111111);
-            }).to.throw('Unknown code');
-        });
+  describe('create', function () {
 
-        it('should return an instance of Error', function () {
-            var e = Exception.create(Exception.OK);
-            expect(e).to.be.instanceof(Error);
-        });
+    it('should only accept number code', function () {
+      expect(()=> Exception.create('zzz') ).to.throw('must be a number')
+      expect(()=> Exception.create() ).to.throw('must be a number')
+      expect(()=> Exception.create(null) ).to.throw('must be a number')
+    })
 
-        it('should return an instance of Exception', function () {
-            var e = Exception.create(Exception.OK);
-            expect(e).to.be.instanceof(Exception);
-        });
-    });
+    it('should only accept predefined code', function () {
+      expect(()=> Exception.create(111111) ).to.throw('Unknown code')
+      expect(()=> Exception.create(-111111) ).to.throw('Unknown code')
+    })
 
-    describe('getCode', function () {
-        it('should return the given code.', function () {
-            var e = Exception.create(Exception.SYSTEM_ERROR);
-            expect(e.getCode()).to.equal(Exception.SYSTEM_ERROR);
-        });
-    });
+    it('should return an instance of Error', function () {
+      let e = Exception.create(Exception.OK)
+      expect(e).to.be.instanceof(Error)
+    })
 
-    describe('getName', function () {
-        it('should return the correct name.', function () {
-            var e = Exception.create(Exception.SYSTEM_ERROR);
-            expect(e.getName()).to.equal('SYSTEM_ERROR');
-        });
-    });
+    it('should return an instance of Exception', function () {
+      let e = Exception.create(Exception.OK)
+      expect(e).to.be.instanceof(Exception)
+    })
+  })
 
-    describe('getPath', function () {
-        it('should return the correct path.', function () {
-            var e = Exception.create(Exception.SYSTEM_ERROR, '/test');
-            expect(e.getPath()).to.equal('/test');
-        });
-    });
+  describe('getCode', function () {
 
-    describe('toString', function () {
-        it('should return the correctly formatted string.', function () {
-            var e1 = Exception.create(Exception.NO_NODE, '/test'),
-                e2 = Exception.create(Exception.NO_NODE);
+    it('should return the given code.', function () {
+      let e = Exception.create(Exception.SYSTEM_ERROR)
+      expect(e.getCode()).to.equal(Exception.SYSTEM_ERROR)
+    })
+  })
 
-            expect(e1.toString()).to.equal(
-                'Exception: NO_NODE[' + Exception.NO_NODE + ']@/test'
-            );
-            expect(e2.toString()).to.equal(
-                'Exception: NO_NODE[' + Exception.NO_NODE + ']'
-            );
-        });
-    });
-});
+  describe('getName', function () {
+
+    it('should return the correct name.', function () {
+      let e = Exception.create(Exception.SYSTEM_ERROR)
+      expect(e.getName()).to.equal('SYSTEM_ERROR')
+    })
+  })
+
+  describe('getPath', function () {
+
+    it('should return the correct path.', function () {
+      let e = Exception.create(Exception.SYSTEM_ERROR, '/test')
+      expect(e.getPath()).to.equal('/test')
+    })
+  })
+
+  describe('toString', function () {
+
+    it('should return the correctly formatted string.', function () {
+      let e1 = Exception.create(Exception.NO_NODE, '/test')
+      let e2 = Exception.create(Exception.NO_NODE)
+
+      expect(e1.toString()).to.equal(
+        `Exception: NO_NODE[${Exception.NO_NODE}]@/test`
+      )
+      expect(e2.toString()).to.equal(
+        `Exception: NO_NODE[${Exception.NO_NODE}]`
+      )
+    })
+  })
+})

@@ -5,7 +5,7 @@
  * for terms.
  */
 
-const Path = require('../../lib/Path')
+const Path = require('../lib/Path')
 
 
 describe('Path', function () {

@@ -5,7 +5,7 @@
  * for terms.
  */
 
-let State = require('../../lib/State')
+let State = require('../lib/State')
 
 
 describe('State', function(){

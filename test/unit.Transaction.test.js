@@ -1,6 +1,6 @@
 
-const Transaction = require('../../lib/Transaction')
-const ConnectionManager = require('../../lib/ConnectionManager')
+const Transaction = require('../lib/Transaction')
+const ConnectionManager = require('../lib/ConnectionManager')
 
 describe('Transaction', function(){
 

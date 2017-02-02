@@ -2,7 +2,7 @@
  * Copyright (c) 2013 Yahoo! Inc. All rights reserved.
  */
 
-const ConnectionStringParser = require('../../lib/ConnectionStringParser')
+const ConnectionStringParser = require('../lib/ConnectionStringParser')
 
 
 describe('ConnectionStringParser', function () {
@@ -34,7 +34,6 @@ describe('ConnectionStringParser', function () {
         let parser = new ConnectionStringParser(s)
         expect( parser.getConnectionString() ).to.equal(s)
     })
-
   })
 
 
@@ -59,27 +58,26 @@ describe('ConnectionStringParser', function () {
 
   describe('getServers', function () {
 
-      it('should return an array of host:port objects', function () {
-          let s = 'localhost:2181,localhost:2182',
-              parser = new ConnectionStringParser(s),
-              servers = parser.getServers()
+    it('should return an array of host:port objects', function () {
+      let s = 'localhost:2181,localhost:2182',
+          parser = new ConnectionStringParser(s),
+          servers = parser.getServers()
 
-          expect(servers).to.be.instanceof(Array).that.have.length(2)
-          expect(servers).to.have.deep.property('[0].host', 'localhost')
-          expect(servers).to.have.deep.property('[0].port').match(/218[12]/)
-          expect(servers).to.have.deep.property('[1].host', 'localhost')
-          expect(servers).to.have.deep.property('[1].port').match(/218[12]/)
+      expect(servers).to.be.instanceof(Array).that.have.length(2)
+      expect(servers).to.have.deep.property('[0].host', 'localhost')
+      expect(servers).to.have.deep.property('[0].port').match(/218[12]/)
+      expect(servers).to.have.deep.property('[1].host', 'localhost')
+      expect(servers).to.have.deep.property('[1].port').match(/218[12]/)
+    })
 
-      })
+    it('should add default port if port is not provided', function () {
+      var s = 'localhost',
+          parser = new ConnectionStringParser(s),
+          servers = parser.getServers()
 
-      it('should add default port if port is not provided', function () {
-          var s = 'localhost',
-              parser = new ConnectionStringParser(s),
-              servers = parser.getServers()
-
-          expect(servers).to.be.instanceof(Array).that.have.length(1)
-          expect(servers).to.have.deep.property('[0].host', 'localhost')
-          expect(servers).to.have.deep.property('[0].port', 2181)
-      })
+      expect(servers).to.be.instanceof(Array).that.have.length(1)
+      expect(servers).to.have.deep.property('[0].host', 'localhost')
+      expect(servers).to.have.deep.property('[0].port', 2181)
+    })
   })
 })

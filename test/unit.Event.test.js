@@ -5,74 +5,64 @@
  * for terms.
  */
 
-/*global describe, it, beforeEach, before, after */
-
-var expect = require('chai').expect;
-var Event = require('../../lib/Event.js');
+const Event = require('../lib/Event')
 
 
-describe('Event', function () {
-    describe('create', function () {
-        it('should only accept instance of WatcherEvent', function () {
-            expect(function () {
-                Event.create();
-            }).to.throw('object');
-        });
+describe('Event', function(){
 
-        it('should reject invalid type of WatcherEvent', function () {
-            expect(function () {
-                Event.create({
-                    type : 111
-                });
-            }).to.throw('type');
-        });
+    describe('create', function(){
 
-        it('should return an instance of Event', function () {
-            var e = Event.create({
-                type : Event.NODE_CREATED
-            });
-            expect(e).to.be.instanceof(Event);
-        });
-    });
+      it('should only accept instance of WatcherEvent', function(){
+        let fn = ()=> Event.create()
+        expect( fn ).to.throw('object')
+      })
 
-    describe('getType', function () {
-        it('should return the given type.', function () {
-            var e = Event.create({
-                type : Event.NODE_DATA_CHANGED
-            });
-            expect(e.getType()).to.equal(Event.NODE_DATA_CHANGED);
-        });
-    });
+      it('should reject invalid type of WatcherEvent', function(){
+        let fn = ()=> Event.create({ type: 111 })
+        expect( fn ).to.throw('type')
+      })
 
-    describe('getName', function () {
-        it('should return the correct name.', function () {
-            var e = Event.create({
-                type : Event.NODE_DELETED
-            });
-            expect(e.getName()).to.equal('NODE_DELETED');
-        });
-    });
+      it('should return an instance of Event', function(){
+        let e = Event.create({ type: Event.NODE_CREATED })
+        expect(e).to.be.instanceof(Event)
+      })
+    })
 
-    describe('getPath', function () {
-        it('should return the correct path.', function () {
-            var e = Event.create({
-                type : Event.NODE_CREATED,
-                path : '/test'
-            });
-            expect(e.getPath()).to.equal('/test');
-        });
-    });
+    describe('getType', function(){
 
-    describe('toString', function () {
-        it('should return the correctly formatted string.', function () {
-            var e = Event.create({
-                type : Event.NODE_CREATED,
-                path : '/test'
-            });
+      it('should return the given type.', function(){
+        let e = Event.create({ type: Event.NODE_DATA_CHANGED })
+        expect( e.getType() ).to.equal( Event.NODE_DATA_CHANGED )
+      })
+    })
 
-            expect(e.toString()).to.equal(
-                'NODE_CREATED[' + Event.NODE_CREATED + ']@/test'
-            );
-        });
-    });
-});
+    describe('getName', function(){
+      it('should return the correct name.', function(){
+        let e = Event.create({ type: Event.NODE_DELETED })
+        expect( e.getName() ).to.equal('NODE_DELETED')
+      })
+    })
+
+    describe('getPath', function(){
+      it('should return the correct path.', function(){
+        let e = Event.create({
+            type: Event.NODE_CREATED,
+            path: '/test'
+        })
+        expect( e.getPath() ).to.equal('/test')
+      })
+    })
+
+    describe('toString', function(){
+      it('should return the correctly formatted string.', function(){
+        let e = Event.create({
+          type: Event.NODE_CREATED,
+          path: '/test'
+        })
+
+        expect( e.toString() ).to.equal(
+          'NODE_CREATED[' + Event.NODE_CREATED + ']@/test'
+        )
+      })
+    })
+})

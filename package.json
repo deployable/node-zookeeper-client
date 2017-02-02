@@ -17,8 +17,10 @@
   "scripts": {
     "test": "yarn run test:coverage",
     "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
-    "test:mocha": "mocha test/spec",
-    "test:coverage": "istanbul cover _mocha test/spec && istanbul check-coverage",
+    "test:mocha": "yarn run test:unit; yarn run test:int",
+    "test:unit": "mocha unit*.js",
+    "test:int": "docker-compose up -d; ZOOKEEPER_HOST=localhost ZOOKEEPER_PORT=2183 mocha int_*.js", 
+    "test:coverage": "istanbul cover _mocha && istanbul check-coverage",
     "release:patch": "set -uex; rm -rf node_modules; yarn install; yarn run test:coverage; yarn run test:eslint; git push; npm version patch; npm publish; git push --tags;",
     "release:test": "set -uex; yarn test; npm version prerelease; git push; npm publish --tag testing; git push --tags"
   },
