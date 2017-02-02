@@ -1,6 +1,6 @@
 {
-  "name": "node-zookeeper-client",
-  "version": "0.2.2",
+  "name": "@deployable/node-zookeeper-client",
+  "version": "0.3.0-0",
   "description": "A pure Javascript ZooKeeper client for Node.js.",
   "author": "Alex Guan <alex.guan@gmail.com>",
   "main": "index.js",
@@ -12,19 +12,23 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexguan/node-zookeeper-client"
+    "url": "https://github.com/dpeloyable/node-zookeeper-client"
   },
   "scripts": {
-    "pretest": "eslint index.js lib/*.js lib/jute/*.js",
-    "test": "mocha --recursive --reporter spec test/*",
-    "coverage": "istanbul cover _mocha --recursive test/*"
+    "test": "yarn run test:mocha",
+    "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
+    "test:mocha": "mocha test/spec",
+    "test:coverage": "istanbul cover _mocha --recursive test/* && istanbul check-coverage",
+    "release:test": "",
+    "release:patch": ""
   },
   "engines": {
-    "node": ">=0.6.0"
+    "node": ">=6.0.0"
   },
   "dependencies": {
-    "underscore": "~1.4.4",
-    "async": "~0.2.7"
+    "bluebird": "^3.4.7",
+    "lodash": "^4.17.4",
+    "uuid": "^3.0.1"
   },
   "licenses": [
     {
@@ -33,9 +37,12 @@
     }
   ],
   "devDependencies": {
-    "chai": "~1.5.0",
+    "babel-eslint": "^7.1.1",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
     "eslint": "^3.2.0",
-    "istanbul": "~0.1.34",
-    "mocha": "~1.9.0"
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "sinon": "^1.17.7"
   }
 }
