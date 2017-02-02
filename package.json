@@ -12,15 +12,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/dpeloyable/node-zookeeper-client"
+    "url": "https://github.com/deployable/node-zookeeper-client"
   },
   "scripts": {
-    "test": "yarn run test:mocha",
+    "test": "yarn run test:coverage",
     "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
     "test:mocha": "mocha test/spec",
-    "test:coverage": "istanbul cover _mocha --recursive test/* && istanbul check-coverage",
-    "release:test": "",
-    "release:patch": ""
+    "test:coverage": "istanbul cover _mocha test/spec && istanbul check-coverage",
+    "release:patch": "set -uex; rm -rf node_modules; yarn install; yarn run test:coverage; yarn run test:eslint; git push; npm version patch; npm publish; git push --tags;",
+    "release:test": "set -uex; yarn test; npm version prerelease; git push; npm publish --tag testing; git push --tags"
   },
   "engines": {
     "node": ">=6.0.0"
