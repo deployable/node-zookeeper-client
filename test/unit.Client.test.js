@@ -1,7 +1,7 @@
 
 const Client = require('../lib/Client')
 
-describe('Client', function(){
+describe('Unit::Client', function(){
 
   describe('instance', function(){
 

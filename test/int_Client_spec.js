@@ -13,12 +13,24 @@ describe('Integration::Client', function(){
 
     let client = null
 
-    beforeEach(function(){
+    before(function(){
       client = new Client(connection_string)
     })
 
-    it('should emit some state', function(){
-      client.emit('state','test')
+    it('should connect', function(){
+      return expect( client.connect() ).to.become( true )
+    })
+
+    it('should have session id', function(){
+      expect( client.getSessionId().toString('hex') ).to.equal('0000000000000000')
+    })
+    
+    it('should have a `connected` state', function(){
+      expect( client.getState().code ).to.equal(3)
+    })
+
+    it('should close', function(){
+      return client.close()
     })
 
   })

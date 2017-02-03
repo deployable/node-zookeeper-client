@@ -1,4 +1,5 @@
-const assert            = require('assert')
+
+const assert = require('assert')
 
 /**
  * Try to execute the given function 'fn'. If it fails to execute, retry for
