@@ -2,7 +2,7 @@
  * Copyright (c) 2013 Yahoo! Inc. All rights reserved.
  */
 
-const ConnectionStringParser = require('../lib/ConnectionStringParser')
+const {ConnectionStringParser} = require('../lib/ConnectionStringParser')
 
 
 describe('ConnectionStringParser', function () {

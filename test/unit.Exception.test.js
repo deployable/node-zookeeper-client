@@ -5,7 +5,7 @@
  * for terms.
  */
 
-const Exception = require('../lib/Exception')
+const {Exception} = require('../lib/Exception')
 
 
 describe('Exception', function () {
@@ -13,14 +13,14 @@ describe('Exception', function () {
   describe('create', function () {
 
     it('should only accept number code', function () {
-      expect(()=> Exception.create('zzz') ).to.throw('must be a number')
-      expect(()=> Exception.create() ).to.throw('must be a number')
-      expect(()=> Exception.create(null) ).to.throw('must be a number')
+      expect(()=> Exception.create('zzz') ).to.throw('Unknown Error code')
+      expect(()=> Exception.create() ).to.throw('Unknown Error code')
+      expect(()=> Exception.create(null) ).to.throw('Unknown Error code')
     })
 
     it('should only accept predefined code', function () {
-      expect(()=> Exception.create(111111) ).to.throw('Unknown code')
-      expect(()=> Exception.create(-111111) ).to.throw('Unknown code')
+      expect(()=> Exception.create(111111) ).to.throw('Unknown Error code')
+      expect(()=> Exception.create(-111111) ).to.throw('Unknown Error code')
     })
 
     it('should return an instance of Error', function () {
