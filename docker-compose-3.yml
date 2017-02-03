@@ -1,0 +1,47 @@
+version: "2.1"
+
+services:
+
+  zookeeper1:
+    image: 'deployable/kafka:latest'
+    command: zookeeper
+    ports:
+     - "2183:2181"
+    networks:
+     - node-zookeeper-client
+    healthcheck:
+      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  zookeeper2:
+    image: 'deployable/kafka:latest'
+    command: zookeeper
+    ports:
+     - "2184:2181"
+    networks:
+     - node-zookeeper-client
+    healthcheck:
+      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  zookeeper3:
+    image: 'deployable/kafka:latest'
+    command: zookeeper
+    ports:
+     - "2185:2181"
+    networks:
+     - node-zookeeper-client
+    healthcheck:
+      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  'node-zookeeper-client':
+    driver: bridge
+
