@@ -13,12 +13,14 @@ describe('State', function(){
   describe('constants', function(){
   
     it('should have all defined states', function(){
-      expect(State.STATES.SYNC_CONNECTED).to.exist
-      expect(State.STATES.DISCONNECTED).to.exist
-      expect(State.STATES.AUTH_FAILED).to.exist
-      expect(State.STATES.CONNECTED_READ_ONLY).to.exist
-      expect(State.STATES.SASL_AUTHENTICATED).to.exist
-      expect(State.STATES.EXPIRED).to.exist
+      expect(State.CONNECTED).to.exist
+      expect(State.CLOSED).to.exist
+      expect(State.AUTH_FAILED).to.exist
+      expect(State.CONNECTED_READ_ONLY).to.exist
+      expect(State.EXPIRED_SESSION).to.exist
+
+      //expect(State.SASL_AUTHENTICATED).to.exist
+
     })
 
   })

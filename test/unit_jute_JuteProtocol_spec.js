@@ -29,6 +29,11 @@ let types = [
   'ErrorResponse',
 ]
 
+let types_with_data = [
+  'CreateRequest',
+  'GetChildren2Response'
+]
+
 describe('Unit::jute::JuteProtocol', function(){
 
   describe('class', function(){
@@ -63,6 +68,7 @@ describe('Unit::jute::JuteProtocol', function(){
 
       it('should create all the types', function(){
         types.forEach(type => {
+          if (types_with_data.indexOf(type)) return
           expect( JuteProtocol.create(type) ).to.be.ok
         })
       })
