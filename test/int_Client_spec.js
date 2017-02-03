@@ -37,7 +37,7 @@ describe('Integration::Client', function(){
     })
 
     it('should create some data', function(done){
-      client.create('/', 'testing', done)
+      client.create('/', Buffer.from('testing'), done)
     })
 
     it('should close', function(done){
