@@ -12,14 +12,13 @@ describe('Integration::Client', function(){
   describe('Connection', function(){
 
     let client = null
-    let state = null
 
     before(function(){
       client = new Client(connection_string)
     })
 
-    before(function(){
-      client = new Client(connection_string)
+    after(function(){
+      return client.close()
     })
 
     it('should connect', function(){
@@ -35,6 +34,10 @@ describe('Integration::Client', function(){
         expect( state ).to.equal(3)
         done()
       })
+    })
+
+    it('should create some data', function(done){
+      client.create('/', 'testing', done)
     })
 
     it('should close', function(done){
