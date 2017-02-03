@@ -2,7 +2,7 @@
 const { Deserialize } = require('../lib/jute/Deserialize')
 
 
-describe('Unit::Jute::Deserialize', function(){
+describe('Unit::jute::Deserialize', function(){
 
   describe('class', function(){
 

@@ -2,7 +2,7 @@
 const { Serialize } = require('../lib/jute/Serialize')
 
 
-describe('Unit::Jute::Serialize', function(){
+describe('Unit::jute::Serialize', function(){
 
   describe('class', function(){
 
