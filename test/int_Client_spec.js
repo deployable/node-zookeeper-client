@@ -15,19 +15,16 @@ describe('Integration::Client', function(){
 
     before(function(){
       client = new Client(connection_string)
+      return expect( client.connect() ).to.become( true )
     })
 
     after(function(){
       return client.close()
     })
 
-    it('should connect', function(){
-      return expect( client.connect() ).to.become( true )
-    })
-
-    it('should have session id', function(){
-      expect( client.getSessionId().toString('hex') ).to.equal('0000000000000000')
-    })
+    // it('should connect', function(){
+    //   return expect( client.connect() ).to.be.rejectedWith()
+    // })
     
     it('should have a `connected` state', function(done){
       client.once('state', state => {
@@ -36,17 +33,26 @@ describe('Integration::Client', function(){
       })
     })
 
-    it('should create some data', function(){
-      return client.create('/', {data: Buffer.from('testing')})
+    it('should have session id like 0159fe552a2401a0', function(){
+      expect( client.getSessionId().toString('hex') ).to.match(/^[0-9a-f]{16}$/)
     })
 
     it('should create some data', function(){
-      return expect( client.getData('/') ).to.become({})
+      let prm = client.create('/', {data: Buffer.from('testing')})
+      return expect( prm ).to.become('/')
     })
 
-    it('should close', function(){
-      return client.close()
-    })
+    // it('should get some data', function(){
+    //   return client.getData('/').then(res => {
+    //     expect( res.stat ).to.be.ok
+    //     expect( res.data ).to.be.ok
+    //     expect( res.data.toString() ).to.equal('')
+    //   })
+    // })
+
+    // it('should close', function(){
+    //   return expect( client.close() ).to.eventually.be.ok
+    // })
 
   })
 })

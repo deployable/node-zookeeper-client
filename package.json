@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start:docker": "docker-compose up -d",
-    "test": "yarn run test:coverage",
+    "test": "set -uex; yarn run test:mocha; yarn run test:eslint; yarn run test:coverage",
     "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
     "test:mocha": "set -uex; yarn run start:docker; yarn run test:unit; yarn run test:int",
     "test:mocha:watch": "set -uex; yarn run start:docker; mocha -bw test/unit*.js test/int*.js",
