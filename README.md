@@ -1,11 +1,7 @@
-# node-zookeeper-client
+# zk-client
 
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
-[Node.js](http://nodejs.org).
-
-[![NPM](https://nodei.co/npm/node-zookeeper-client.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/node-zookeeper-client/)
-
-[![Build Status](https://travis-ci.org/alexguan/node-zookeeper-client.png?branch=master)](https://travis-ci.org/alexguan/node-zookeeper-client)
+[Node.js](http://nodejs.org). ES2015 fork of https://github.com/yfinkelstein/node-zookeeper
 
 This module is designed to resemble the ZooKeeper Java client API but with
 tweaks to follow the convention of Node.js modules. Developers that are familiar
@@ -56,10 +52,11 @@ This module has been tested to work with ZooKeeper version 3.4.*.
 
 ## Installation
 
-You can install it using npm:
+You can install it using npm or yarn:
 
 ```bash
-$ npm install node-zookeeper-client
+$ npm install zk-client --save
+$ yarn add zk-client
 ```
 
 ## Example
@@ -67,64 +64,59 @@ $ npm install node-zookeeper-client
 1\. Create a node using given path:
 
 ```javascript
-var zookeeper = require('node-zookeeper-client');
+const zk = require('zk-client');
 
-var client = zookeeper.createClient('localhost:2181');
-var path = process.argv[2];
+const hostlist = 'localhost:2181'
+const client = zookeeper.createClient(hostlist);
+var zkpath = process.argv[2];
 
-client.once('connected', function () {
-    console.log('Connected to the server.');
+client.connect().then(() => {
+  console.log('Connected to the server.')
 
-    client.create(path, function (error) {
-        if (error) {
-            console.log('Failed to create node: %s due to: %s.', path, error);
-        } else {
-            console.log('Node: %s is successfully created.', path);
-        }
+  client.create(zkpath).then(res => {
+    console.log('Node: %s is successfully created.', path);
+  })
+  .catch(error => {
+    console.log('Failed to create node: %s due to: %s.', zkpath, error)
+  })
+  .finally(()=> {
+    client.close()
+  })
 
-        client.close();
-    });
-});
+})
+.catch(error => {
+  console.log('Failed to connect to hosts: %s', hostlist)
+  process.exit(1)
+})
 
-client.connect();
 ```
 
 2\. List and watch the children of given node:
 
 ```javascript
-var zookeeper = require('node-zookeeper-client');
+const zk = require('zk-client')
 
-var client = zookeeper.createClient('localhost:2181');
-var path = process.argv[2];
+const client = zookeeper.createClient('localhost:2181')
+let zkpath = process.argv[2]
 
-function listChildren(client, path) {
-    client.getChildren(
-        path,
-        function (event) {
-            console.log('Got watcher event: %s', event);
-            listChildren(client, path);
-        },
-        function (error, children, stat) {
-            if (error) {
-                console.log(
-                    'Failed to list children of %s due to: %s.',
-                    path,
-                    error
-                );
-                return;
-            }
-
-            console.log('Children of %s are: %j.', path, children);
-        }
-    );
+function listChildren(zkpath) {
+  client.getChildren(path, (event) => {
+      console.log('Got watcher event: %s', event)
+      listChildren(zkpath)
+  })
+  .then((children, stat) => {
+    console.log('Children of %s are: %j.', path, children)
+  })
+  .catch(error => {
+    console.log('Failed to list children of %s due to: %s.', path, error)
+  })
 }
 
-client.once('connected', function () {
-    console.log('Connected to ZooKeeper.');
-    listChildren(client, path);
-});
+client.connect().then(()=> {
+  console.log('Connected to ZooKeeper.')
+  return listChildren(zkpath)
+})
 
-client.connect();
 ```
 
 More examples can be found [here](tree/master/examples).

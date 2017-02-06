@@ -1,12 +1,12 @@
 
-const Client = require('../lib/Client')
+const Client = require('../lib/ZookeperClient')
 
 let host = process.env.ZOOKEEPER_HOST || 'localhost'
 let port = process.env.ZOOKEEPER_PORT || 2183
 let connection_string = `${host}:${port}`
 
 
-describe('Integration::Client', function(){
+describe('Integration::ZookeeperClient', function(){
 
 
   describe('Connection', function(){
@@ -36,16 +36,12 @@ describe('Integration::Client', function(){
       })
     })
 
-    it('should create some data', function(){
-      return client.create('/', {data: Buffer.from('testing')})
+    it('should create some data', function(done){
+      client.create('/', Buffer.from('testing'), done)
     })
 
-    it('should create some data', function(){
-      return expect( client.getData('/') ).to.become({})
-    })
-
-    it('should close', function(){
-      return client.close()
+    it('should close', function(done){
+      return client.close(done)
     })
 
   })
