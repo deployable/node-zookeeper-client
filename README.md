@@ -1,5 +1,7 @@
 # zk-client
 
+WIP
+
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
 [Node.js](http://nodejs.org). ES2015 fork of https://github.com/yfinkelstein/node-zookeeper
 
