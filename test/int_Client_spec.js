@@ -8,6 +8,24 @@ let connection_string = `${host}:${port}`
 
 describe('Integration::Client', function(){
 
+  describe('First Connect', function(){
+
+    let client = null
+
+    it('should create a client', function(){
+      client = new Client(connection_string)
+      expect( client ).to.be.ok
+    })
+
+    it('should connect a client', function(){
+      return expect( client.connect() ).to.become( true )
+    })
+
+    it('should close a client', function(){
+      return expect( client.close() ).to.become( true )
+    })
+
+  })
 
   describe('Connection', function(){
 
