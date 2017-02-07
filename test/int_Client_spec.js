@@ -44,11 +44,8 @@ describe('Integration::Client', function(){
     //   return expect( client.connect() ).to.be.rejectedWith()
     // })
     
-    it('should have a `connected` state', function(done){
-      client.once('state', state => {
-        expect( state ).to.equal(3)
-        done()
-      })
+    it('should have a `connected` state', function(){
+      expect( client.getState() ).to.equal(3)
     })
 
     it('should have session id like 0159fe552a2401a0', function(){
