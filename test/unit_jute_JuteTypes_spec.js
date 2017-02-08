@@ -58,6 +58,30 @@ describe('Unit::jute::Types', function(){
       let int = JuteTypeInt.createDeserialize(buf,8)
       expect(int.value).to.equal(4)
     })
+
+    it('should compare two short longs', function(){
+      let low = JuteTypeLong.create(7)
+      let high = JuteTypeLong.create(8)
+      expect( high.isGreaterThan(low) ).to.be.true
+    })
+
+    it('should compare two long longs', function(){
+      let low = JuteTypeLong.create(14865056721531)
+      let high = JuteTypeLong.create(14865056721542)
+      expect( high.isGreaterThan(low) ).to.be.true
+    })
+
+    it('should compare two long longs', function(){
+      let low = JuteTypeLong.create(14865056721531)
+      let high = JuteTypeLong.create(14865056721542)
+      expect( low.isGreaterThan(high) ).to.be.false
+    })
+
+    it('should compare two long longs', function(){
+      let high = JuteTypeLong.create(14865056721531)
+      expect( high.isGreaterThan(high) ).to.be.false
+    })
+
   })
 
   describe('JuteTypeBoolean', function(){
@@ -92,12 +116,19 @@ describe('Unit::jute::Types', function(){
       expect( buff.bytes ).to.equal( 8 )
     })
 
-    it('should serialize', function(){
+    it('should serialize astring', function(){
       let buf = new Buffer(20).fill(0)
       let jbufval = new Buffer.from('astring')
       let jbuf = JuteTypeBuffer.create(jbufval)
       jbuf.serialize(buf, 8)
       expect( buf ).to.eql(Buffer.from([0,0,0,0,0,0,0,0,0,0,0,7,97,115,116,114,105,110,103,0]))
+    })
+
+    it('should serialize an empty buffer', function(){
+      let buf = new Buffer(20).fill(0)
+      let jbuf = JuteTypeBuffer.create()
+      jbuf.serialize(buf, 8)
+      expect( buf ).to.eql(Buffer.from([0,0,0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0]))
     })
 
     it('should deserialize', function(){
@@ -149,7 +180,7 @@ describe('Unit::jute::Types', function(){
       // 4 + 4+4 + 4+4 
       vect.serialize(buf, 1)
       let res = Buffer.from(
-        [0,0,0,0,16,0,0,0,4,111,110,101,97,0,0,0,4,116,119,111,98,0,0,0]
+        [0,0,0,0,2,0,0,0,4,111,110,101,97,0,0,0,4,116,119,111,98,0,0,0]
       )
       expect( buf ).to.eql( res )
     })

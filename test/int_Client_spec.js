@@ -1,4 +1,6 @@
 
+const crypto = require('crypto')
+
 const Client = require('../lib/Client')
 
 let host = process.env.ZOOKEEPER_HOST || 'localhost'
@@ -8,7 +10,7 @@ let connection_string = `${host}:${port}`
 
 describe('Integration::Client', function(){
 
-  describe('First Connect', function(){
+  describe('Connection', function(){
 
     let client = null
 
@@ -27,9 +29,10 @@ describe('Integration::Client', function(){
 
   })
 
-  describe('Connection', function(){
+  describe('Operations', function(){
 
     let client = null
+    let node_path = crypto.randomBytes(8).toString('hex')
 
     before(function(){
       client = new Client(connection_string)
@@ -53,9 +56,34 @@ describe('Integration::Client', function(){
     })
 
     it('should create some data', function(){
-      let prm = client.create('/', {data: Buffer.from('testing')})
-      return expect( prm ).to.become('/')
+      let prm = client.create(
+        `/${node_path}`,
+        {data: Buffer.from('testing')}
+      )
+      return prm.then(res => {
+        expect(res).to.eql( `/${node_path}` )
+      })
     })
+
+    it('should check data exists', function(){
+      let prm = client.exists(`/${node_path}`)
+      return expect(prm).to.become( `/${node_path}` )
+    })
+
+    it('should remove some data', function(){
+      let prm = client.remove(`/${node_path}`)
+      return expect(prm).to.become( `/${node_path}` )
+    })
+
+    it('should create a test node', function(){
+      return expect(client.mkdirp('/test') ).to.become('/test')
+    })
+
+    it('should create a test/test2 node', function(){
+      let prm = client.mkdirp('/test/test2')
+      return expect( prm ).to.become('/test/test2')
+    })
+
 
     // it('should get some data', function(){
     //   return client.getData('/').then(res => {
