@@ -1,7 +1,12 @@
 const debug = require('debug')('dply:test:unit:jute:ZkJuteProtocol')
 
 const { ZkJuteData,
+      JuteDataZkStat,
+      JuteDataZkAcl,
+      JuteDataZkId,
       ZkJuteProtocol } = require('../lib/jute/Protocol')
+
+const { JuteTypeVector } = require('../lib/jute/Types') 
 
 let types = [
   'ConnectRequest',
@@ -31,13 +36,34 @@ let types = [
   'ErrorResponse',
 ]
 
-let types_with_data = [
-  'CreateRequest',
+let types_with_JuteData = [
+  'CreateTTLRequest',
   'GetChildren2Response',
   'GetACLResponse',
   'SetACLRequest',
-
 ]
+
+let types_with_ACL = [
+  'CreateRequest',
+  'GetACLResponse',
+  'SetACLRequest',
+  'CreateTTLRequest'
+]
+
+let types_with_Stat = [
+  'GetChildren2Response',
+  'GetACLResponse',
+  'SetACLResponse',
+  'ExistsResponse',
+  'SetDataResponse',
+  'GetDataResponse'
+]
+
+let types_with_Id = [
+  'JuteDataZkACL',
+]
+
+
 
 describe('Unit::jute::ZkJuteProtocol', function(){
 
@@ -76,13 +102,36 @@ describe('Unit::jute::ZkJuteProtocol', function(){
       it('should create all the types', function(){
         types.forEach(type => {
           debug('type', type)
-          if (types_with_data.indexOf(type) !== -1 ) return
+          if (types_with_JuteData.indexOf(type) !== -1 ) return
           expect( ZkJuteProtocol.create(type) ).to.be.ok
         })
       })
 
     })
 
+    describe('records types with Stat attached', function(){
+      types_with_Stat.forEach(type => {
+        it(`should access stat in types ${type}`, function(){
+          let obj
+          expect( obj = ZkJuteProtocol.create(type) ).to.be.ok
+          expect( obj.stat ).to.be.ok
+          expect( () => obj.stat = 'yep' ).to.be.throw()
+          expect( obj._stat ).to.be.instanceof(JuteDataZkStat)
+        })
+      })
+    })
+
+    describe('records types with Acl attached', function(){
+      types_with_ACL.forEach(type => {
+        it(`should access stat in types ${type}`, function(){
+          let obj
+          expect( obj = ZkJuteProtocol.create(type) ).to.be.ok
+          expect( obj.acl ).to.be.ok
+          expect( obj.acl = 'yep' ).to.be.ok
+          expect( obj._acl ).to.be.instanceof(JuteTypeVector)
+        })
+      })
+    })
 
   })
 
