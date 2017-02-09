@@ -19,16 +19,15 @@ const debug             = require('debug')('dply:node-zookeeper-client:index')
 debug('loading')
 
 const Client            = require('./lib/Client')
-const ACL               = require('./lib/ACL')
+const ConnectionManager = require('./lib/ConnectionManager')
+const {ACL, Permission } = require('./lib/ACL')
 const Id                = require('./lib/Id')
 const Event             = require('./lib/Event')
 const State             = require('./lib/State')
-const Permission        = require('./lib/Permission')
 const CreateMode        = require('./lib/CreateMode')
 const Exception         = require('./lib/Exception')
 
-const { CLIENT_DEFAULT_OPTIONS } = require('./constants')
-const { defaultStateListener, attempt } = require('./functions')
+const { CLIENT_DEFAULT_OPTIONS } = require('./lib/constants')
 
 /**
  * Create a new ZooKeeper client.
@@ -43,7 +42,7 @@ function createClient(connectionString, options) {
 module.exports = {
   ACL, Client, Id, Permission, CreateMode, State, Event, Exception,
   CLIENT_DEFAULT_OPTIONS,
-  createClient, defaultStateListener, attempt
+  createClient
 }
 
 debug('loaded')
