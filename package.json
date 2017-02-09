@@ -15,15 +15,15 @@
     "url": "https://github.com/deployable/node-zookeeper-client"
   },
   "scripts": {
-    "start:docker": "docker-compose up -d",
+    "start:docker": "docker-compose up -d --force-recreate",
     "test": "set -uex; yarn run test:mocha; yarn run test:eslint; yarn run test:coverage",
     "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
-    "test:mocha": "set -uex; yarn run start:docker; yarn run test:unit; yarn run test:int",
+    "test:mocha": "set -uex; yarn run test:unit; yarn run test:int",
     "test:mocha:watch": "set -uex; yarn run start:docker; mocha -bw test/unit*.js test/int*.js",
     "test:unit": "mocha test/unit*.js",
     "test:unit:watch": "mocha -w test/unit*.js",
-    "test:int": "set -uex; yarn run start:docker; ZOOKEEPER_HOST=localhost ZOOKEEPER_PORT=2183 mocha test/int*.js", 
-    "test:int:watch": "set -uex; yarn run start:docker; ZOOKEEPER_HOST=localhost ZOOKEEPER_PORT=2183 mocha -w test/int*.js", 
+    "test:int": "set -uex; yarn run start:docker; ZOOKEEPER_HOST=localhost ZOOKEEPER_PORT=2183 mocha test/int*.js",
+    "test:int:watch": "set -uex; yarn run start:docker; ZOOKEEPER_HOST=localhost ZOOKEEPER_PORT=2183 mocha -w test/int*.js",
     "test:coverage": "istanbul cover _mocha && istanbul check-coverage",
     "release:patch": "set -uex; rm -rf node_modules; yarn install; yarn run test:coverage; yarn run test:eslint; git push; npm version patch; npm publish; git push --tags;",
     "release:test": "set -uex; yarn test; npm version prerelease; git push; npm publish --tag testing; git push --tags"

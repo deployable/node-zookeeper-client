@@ -20,6 +20,7 @@ describe('Integration::Client', function(){
     })
 
     it('should connect a client', function(){
+      this.timeout(10000)
       return expect( client.connect() ).to.become( true )
     })
 
@@ -35,6 +36,7 @@ describe('Integration::Client', function(){
     let node_path = crypto.randomBytes(8).toString('hex')
 
     before(function(){
+      this.timeout(10000)
       client = new Client(connection_string)
       return expect( client.connect() ).to.become( true )
     })
@@ -67,12 +69,28 @@ describe('Integration::Client', function(){
 
     it('should check data exists', function(){
       let prm = client.exists(`/${node_path}`)
-      return expect(prm).to.become( `/${node_path}` )
+      //return expect(prm).to.become( `/${node_path}` )
+      return prm.then(res => {
+        expect( res ).to.have.keys(
+          'czxid',
+          'mzxid',
+          'ctime',
+          'mtime',
+          'version',
+          'cversion',
+          'aversion',
+          'ephemeralOwner',
+          'dataLength',
+          'numChildren',
+          'pzxid'
+        )
+      })
     })
 
     it('should remove some data', function(){
       let prm = client.remove(`/${node_path}`)
-      return expect(prm).to.become( `/${node_path}` )
+      //return expect(prm).to.become( `/${node_path}` )
+      return expect(prm).to.become( true )
     })
 
     it('should create a test node', function(){
@@ -84,6 +102,36 @@ describe('Integration::Client', function(){
       return expect( prm ).to.become('/test/test2')
     })
 
+    it('should setData on /test', function(){
+      let now = Date.now()
+      let prm = client.setData('/test', Buffer.from('testing'))
+      return prm.then(res =>{
+        expect( res ).to.have.keys(
+          'czxid',
+          'mzxid',
+          'ctime',
+          'mtime',
+          'version',
+          'cversion',
+          'aversion',
+          'ephemeralOwner',
+          'dataLength',
+          'numChildren',
+          'pzxid'
+        )
+        expect( res.ctime ).to.be.a.number
+        expect( res.mtime ).to.be.at.least( now )
+      })
+    })
+
+    it('should getData on /test', function(){
+      return client.
+      getData('/test').then(res =>{
+        expect( res.data ).to.ok
+        expect( res.data.toString() ).to.equal('testing')
+        expect( res.stat ).to.be.ok
+      })
+    })
 
     // it('should get some data', function(){
     //   return client.getData('/').then(res => {

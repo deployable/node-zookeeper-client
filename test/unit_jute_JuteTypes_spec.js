@@ -108,6 +108,7 @@ describe('Unit::jute::Types', function(){
 
   })
 
+
   describe('JuteTypeBuffer', function(){
 
     it('should create a string', function(){
@@ -132,10 +133,22 @@ describe('Unit::jute::Types', function(){
     })
 
     it('should deserialize', function(){
-      let buf = new Buffer(16)
-      buf.writeUInt8(1,8)
-      let boo = JuteTypeBuffer.createDeserialize(buf,8)
-      expect(boo.value).to.equal(true)
+      let buf = Buffer.from('aaaabca')
+      buf.writeInt32BE(2,0)
+      let boo = new JuteTypeBuffer()
+      boo.deserialize(buf,0)
+      expect( boo.value ).to.be.ok
+      expect( boo.value ).to.be.a.buffer
+      expect( boo.value.toString() ).to.equal('bc')
+    })
+
+    it('should create + deserialize', function(){
+      let buf = Buffer.from('aaaabca')
+      buf.writeInt32BE(1,0)
+      let boo = JuteTypeBuffer.createDeserialize(buf, 0)
+      expect( boo.value ).to.be.ok
+      expect( boo.value ).to.be.a.buffer
+      expect( boo.value.toString() ).to.equal('b')
     })
   })
 
