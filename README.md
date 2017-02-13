@@ -3,13 +3,15 @@
 WIP
 
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
-[Node.js](http://nodejs.org). ES2015 fork of https://github.com/yfinkelstein/node-zookeeper
+[Node.js](http://nodejs.org). Cloned from https://github.com/alexguan/node-zookeeper-client and
+updated to use ES2015 and Promises.
 
-This module is designed to resemble the ZooKeeper Java client API but with
-tweaks to follow the convention of Node.js modules. Developers that are familiar
-with the ZooKeeper Java client would be able to pick it up quickly.
+The module was originally designed to resemble the ZooKeeper Java client API but has been 
+tweaked a bit to fit with Node.js. Developers that are familiar with the ZooKeeper Java client
+would be able to pick it up quickly.
 
-This module has been tested to work with ZooKeeper version 3.4.*.
+This module has been tested to work with ZooKeeper version 3.4.*. Docker compose definitions
+of the test environments are included in the project.
 
 ---
 
@@ -35,7 +37,6 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getSessionId](#buffer-getsessionid)
         + [getSessionPassword](#buffer-getsessionpassword)
         + [getSessionTimeout](#number-getsessiontimeout)
-    + [State](#state)
     + [Event](#event)
     + [Transaction](#transaction)
         + [create](#transaction-createpath-data-acls-mode)
@@ -49,7 +50,7 @@ This module has been tested to work with ZooKeeper version 3.4.*.
         + [getName](#string-getname)
         + [toString](#string-tostring)
     + [Exception](#exception)
-+ [Dependency](#dependency)
++ [Dependencies](#dependencies)
 + [License](#license)
 
 ## Installation
@@ -57,20 +58,18 @@ This module has been tested to work with ZooKeeper version 3.4.*.
 You can install it using npm or yarn:
 
 ```bash
-$ npm install zk-client --save
-$ yarn add zk-client
+npm install zk-client --save
+yarn add zk-client
 ```
 
 ## Example
 
-1\. Create a node using given path:
+### Connect and create a node:
 
 ```javascript
 const zk = require('zk-client');
-
-const hostlist = 'localhost:2181'
-const client = zookeeper.createClient(hostlist);
-var zkpath = process.argv[2];
+const client = zk.client('localhost:2181,localhost:2182')
+let zkpath = process.argv[2];
 
 client.connect().then(() => {
   console.log('Connected to the server.')
@@ -93,25 +92,26 @@ client.connect().then(() => {
 
 ```
 
-2\. List and watch the children of given node:
+### List and watch the children of given node:
 
 ```javascript
 const zk = require('zk-client')
 
-const client = zookeeper.createClient('localhost:2181')
+const client = zk.createClient('localhost:2181')
 let zkpath = process.argv[2]
 
 function listChildren(zkpath) {
-  client.getChildren(path, (event) => {
-      console.log('Got watcher event: %s', event)
-      listChildren(zkpath)
-  })
-  .then((children, stat) => {
-    console.log('Children of %s are: %j.', path, children)
-  })
-  .catch(error => {
-    console.log('Failed to list children of %s due to: %s.', path, error)
-  })
+  let watcher = (event) => {
+    console.log('Got watcher event: %s', event)
+    listChildren(zkpath)
+  }
+  return client.getChildren(path, watcher)
+    .then((children, stat) => {
+      console.log('Children of %s are: %j.', path, children)
+    })
+    .catch(error => {
+      console.log('Failed to list children of %s due to: %s.', path, error)
+    })
 }
 
 client.connect().then(()=> {
@@ -126,7 +126,7 @@ More examples can be found [here](tree/master/examples).
 
 ## Documentation
 
-#### Client createClient(connectionString, [options])
+#### Client client(connectionString, [options])
 
 Factory method to create a new zookeeper [client](#client) instance.
 
@@ -161,47 +161,47 @@ Factory method to create a new zookeeper [client](#client) instance.
 **Example**
 
 ```javascript
-var client = zookeeper.createClient(
+let client = zk.client(
     'localhost:2181/test',
     { sessionTimeout: 10000 }
-);
+)
 ```
 
 ---
 
 ### Client
 
-This is the main class of ZooKeeper client module. An application must
-use [`createClient`](#createclientconnectionstring-options) method to
-instantiate the client.
+This is the main class of ZooKeeper client module. An application can
+use the [`client`](#createclientconnectionstring-options) method that is 
+imported when you `require('zk-client')` to instantiate a Client.
 
 Once a connection from the client to the server is established, a session id is
-assigned to the client. The client will starts sending heart beats to the server
+assigned to the client. The client will start sending heart beats to the server
 periodically to keep the session valid.
 
 If the client fails to send heart beats to the server for a prolonged period of
-time (exceeding the sessionTimeout value), the server will expire the session.
+time (exceeding the `sessionTimeout` value), the server will expire the session.
 The client object will no longer be usable.
 
-If the ZooKeeper server the client currently connects to fails or otherwise
+If the ZooKeeper server that the client is currently connected to fails, or otherwise
 does not respond, the client will automatically try to connect to another server
 before its session times out. If successful, the application can continue to
-use the client.
+use the same client.
 
 This class inherits from [events.EventEmitter](http://nodejs.org/api/events.html)
 class, see [Event](#event) for details.
 
-#### void connect()
+#### Promise `connect()`
 
 Initiate the connection to the provided server list (ensemble). The client will
 pick an arbitrary server from the list and attempt to connect to it. If the
 establishment of the connection fails, another server will be tried (picked
-randomly) until a connection is established or [close](#close) method is
+randomly) until a connection is established or the [close](#close) method is
 invoked.
 
 ---
 
-#### void close()
+#### Promise `close()`
 
 Close this client. Once the client is closed, its session becomes invalid.
 All the ephemeral nodes in the ZooKeeper server associated with the session
@@ -210,41 +210,38 @@ be triggered.
 
 ---
 
-#### void create(path, [data], [acls], [mode], callback)
+#### Promise create(path, [data], [acls], [mode])
 
 Create a node with given path, data, acls and mode.
 
 **Arguments**
 
 * path `String` - Path of the node.
-* data `Buffer` - The data buffer, optional, defaults to null.
-* acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
+* options `Object` - optiona paramaters:
+* - data `Buffer` - The data buffer, optional, defaults to null.
+* - acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
   `ACL.OPEN_ACL_UNSAFE` 
-* mode `CreateMode` -  The creation mode, optional, defaults to
+* - mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
-* callback(error, path) `Function` - The callback function.
 
 **Example**
 
 ```javascript
-zookeeper.create(
-    '/test/demo',
-    new Buffer('data'),
-    CreateMode.EPHEMERAL,
-    function (error, path) {
-        if (error) {
-            console.log(error.stack);
-            return;
-        }
-
-        console.log('Node: %s is created.', path);
-    }
-);
+let options = {
+  data: Buffer.from('data'),
+  mode: CreateMode.EPHEMERAL
+}
+zookeeper.create('/test/demo', options).then(res => {
+  console.log('Node: %s is created.', path)
+})
+.catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
 
-#### void remove(path, [version], callback)
+#### Promise remove(path, [{ version: Number }])
 
 Delete a node with the given path and version. If version is provided and not
 equal to -1, the request will fail when the provided version does not match the
@@ -254,26 +251,23 @@ server version.
 
 * path `String` - Path of the node.
 * version `Number` - The version of the node, optional, defaults to -1.
-* callback(error) `Function` - The callback function.
 
 **Example**
 
 ```javascript
-zookeeper.remove('/test/demo', -1, function (error) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    console.log('Node is deleted.');
-});
+zookeeper.remove('/test/demo').then(res => {
+  console.log('Node is deleted.')
+})
+.catch(error => {
+  console.log(error.stack);
+})
 ```
 
 ---
 
-#### void exists(path, [watcher], callback)
+#### Promise exists(path, [{ watcher: Function }])
 
-Check the existence of a node. The callback will be invoked with the
+Check the existence of a node. The promise will resolve with the
 stat of the given path, or `null` if no such node exists.
 
 If the watcher function is provided and the operation is successful (no error),
@@ -286,34 +280,30 @@ sets the data on the node.
 * path `String` - Path of the node.
 * watcher(event) `Function` - The watcher function, optional. The `event` is an
   instance of [`Event`](#event)
-* callback(error, stat) `Function` - The callback function. The `stat` is an
-  instance of [`Stat`](#stat).
+* Resolves `stat` an instance of [`Stat`](#stat).
 
 **Example**
 
 ```javascript
-zookeeper.exists('/test/demo', function (error, stat) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    if (stat) {
-        console.log('Node exists.');
-    } else {
-        console.log('Node does not exist.');
-    }
-});
+zookeeper.exists('/test/demo').then(stat => {
+  if (stat) {
+    console.log('Node exists. Updated at %s', stat.mtime)
+  } else {
+    console.log('Node does not exist.')
+  }
+}).catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
 
-#### void getChildren(path, [watcher], callback)
+#### Promise getChildren(path, [{ watcher: Function }])
 
 For the given node path, retrieve the children list and the stat. The children
 will be an unordered list of strings.
 
-If the watcher callback is provided and the operation is successfully, a watcher
+If the watcher callback is provided and the operation is successful, a watcher
 will be placed the given node. The watcher will be triggered
 when an operation successfully deletes the given node or creates/deletes
 the child under it.
@@ -323,24 +313,19 @@ the child under it.
 * path `String` - Path of the node.
 * watcher(event) `Function` - The watcher function, optional. The `event` is an
   instance of [`Event`](#event)
-* callback(error, children, stat) `Function` - The callback function. The
-  children is an array of strings and the `stat` is an instance of
-  [`Stat`](#stat).
+* Resolves { stat: Stat, children: Array<String> } 
 
 **Example**
 
 ```javascript
-zookeeper.getChildren('/test/demo', function (error, children, stats) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    console.log('Children are: %j.', children);
-});
+zookeeper.getChildren('/test/demo').then(res => {
+  console.log('Children are: %j.', children)
+}).catch(error => {
+  console.log(error.stack)
+})
 ```
 
-#### void getData(path, [watcher], callback)
+#### Promise getData(path, { watcher: Function })
 
 Retrieve the data and the stat of the node of the given path. If the watcher
 function is provided and the operation is successful (no error), a watcher
@@ -352,88 +337,72 @@ a successful operation which sets data on the node, or deletes the node.
 * path `String` - Path of the node.
 * watcher(event) `Function` - The watcher function, optional. The `event` is an
   instance of [`Event`](#event)
-* callback(error, data, stat) `Function` - The callback function. The `data` is
-  an instance of [`Buffer`](http://nodejs.org/api/buffer.html) and stat is an
-  instance of [`Stat`](#stat).
+* Resolves { data: Buffer, stat: Stat }
 
 **Example**
 
 ```javascript
-zookeeper.getData(
-    '/test/demo',
-    function (event) {
-        console.log('Got event: %s.', event);
-    },
-    function (error, data, stat) {
-        if (error) {
-            console.log(error.stack);
-            return;
-        }
-
-        console.log('Got data: %s', data.toString('utf8'));
-    }
-);
+let watcher = (event) => console.log('Got event: %s.', event)
+zookeeper.getData('/test/demo', { watcher: watcher }).then(res => {
+  console.log('Got data: %s from %s', res.data.toString('utf8'), res.stat.mtime)
+})
+.catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
 
-#### void setData(path, data, [version], callback)
+#### Promise setData(path, data, [{ version: Number }])
 
 Set the data for the node of the given path if such a node exists and the
 optional given version matches the version of the node (if the given
 version is -1, it matches any node's versions). The [stat](#stat) of the node
-will be returned through the callback function.
+will be resolved.
 
 **Arguments**
 
 * path `String` - Path of the node.
 * data `Buffer` - The data buffer.
 * version `Number` - The version of the node, optional, defaults to -1.
-* callback(error, stat) `Function` - The callback function. The `stat` is an
-  instance of [`Stat`](#stat).
+* Resolves an instance of [`Stat`](#stat).
 
 **Example**
 
 ```javascript
-zookeeper.setData('/test/demo', null, 2, function (error, stat) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    console.log('Data is set.');
-});
+zookeeper.setData('/test/demo', null, 2).then(stat => {
+  console.log('Data is set.')
+})
+.catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
 
-#### void getACL(path, callback)
+#### Promise getACL(path)
 
-Retrieve the list of [ACL](#acl) and stat of the node of the given path.
+Resolve the list of [ACL](#acl) and the Stat of the node of the given path.
 
 **Arguments**
 
 * path `String` - Path of the node.
-* callback(error, acls, stat) `Function` - The callback function. `acls` is an
-  array of [`ACL`](#acl) instances. The `stat` is an instance of
-  [`Stat`](#stat).
+* Resolves { acls: [ACL], stat: Stat }
 
 **Example**
 
 ```javascript
-zookeeper.getACL('/test/demo', function (error, acls, stat) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    console.log('ACL(s) are: %j', acls);
-});
+zookeeper.getACL('/test/demo').then(res => {
+  console.log('ACL(s) are: %j', res.acls)
+})
+.catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
 
-#### void setACL(path, acls, [version], callback)
+#### Promise setACL(path, acls, [{ version: Number}])
 
 Set the [ACL](#acl) for the node of the given path if such a node exists and the
 given version (optional) matches the version of the node on the server. (if the
@@ -443,30 +412,20 @@ given version is -1, it matches any versions).
 
 * path `String` - Path of the node.
 * acls `Array` - An array of [`ACL`](#acl) instances.
-* version `Number` - The version of the node, optional, defaults to -1.
-* callback(error, stat) `Function` - The callback function. The `stat` is an
-  instance of [`Stat`](#stat).
+* options `Object`
+* - version `Number` - The version of the node, defaults to -1.
+* Resolves an instance of [`Stat`](#stat) for the node.
 
 **Example**
 
 ```javascript
-zookeeper.setACL(
-    '/test/demo',
-    [
-        new zookeeper.ACL(
-            zookeeeper.Permission.ADMIN,
-            new zookeeper.Id('ip', '127.0.0.1')
-        )
-    ],
-    function (error, acls, stat) {
-        if (error) {
-            console.log(error.stack);
-            return;
-        }
-
-        console.log('New ACL is set.');
-    }
-);
+let acls = [ zk.ACL.ip('127.0.0.1','crwd') ]
+zookeeper.setACL('/test/demo', acls).then(stat => {
+  console.log('ACL set')
+})
+.catch(error => {
+  console.log(error.stack)
+})
 ```
 
 ---
@@ -487,31 +446,30 @@ var transaction = zookeeper.transaction();
 
 ---
 
-#### void mkdirp(path, [data], [acls], [mode], callback)
+#### Promise mkdirp(path, [{ data: Buffer, acls: [ACL], mode: Number)}])
 
-Create given path in a way similar to `mkdir -p`.
+Create a given node including all parents, similar to `mkdir -p`.
 
 **Arguments**
 
 * path `String` - Path of the node.
-* data `Buffer` - The data buffer, optional, defaults to `null`.
-* acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
+* options `Object`
+* - data `Buffer` - The data buffer, optional, defaults to `null`.
+* - acls `Array` - An array of [ACL](#acl) objects, optional, defaults to
   `ACL.OPEN_ACL_UNSAFE` 
-* mode `CreateMode` -  The creation mode, optional, defaults to
+* - mode `CreateMode` -  The creation mode, optional, defaults to
   `CreateMode.PERSISTENT`
-* callback(error, path) `Function` - The callback function.
+* Resolves a String path on success
 
 **Example**
 
 ```javascript
-zookeeper.mkdirp('/test/demo/1/2/3', function (error, path) {
-    if (error) {
-        console.log(error.stack);
-        return;
-    }
-
-    console.log('Node: %s is created.', path);
-});
+zk.mkdirp('/test/demo/1/2/3').then(path => {
+  console.log('Node: %s is created.', path)
+})
+.catch(error => {})
+  console.log(error.stack)
+})
 ```
 
 ---
@@ -535,14 +493,13 @@ zookeeper.addAuthInfo('ip', new Buffer('127.0.0.1'));
 
 #### State getState()
 
-Return the current client [state](#state).
+Return the current client/connection [state](#state).
 
 **Example**
 
 ```javascript
-var client = zookeeper.createClient({...});
-var state = client.getState();
-console.log('Current state is: %s', state);
+const client = zk.createClient('127.0.0.1:2181')
+console.log('Current state is: %s', client.getState())
 ```
 
 ---
@@ -552,16 +509,15 @@ console.log('Current state is: %s', state);
 Returns the session id of this client instance. The value returned is not valid
 until the client connects to a server and may change after a re-connect.
 
-The id returned is a long integer stored into a 8 bytes
-[`Buffer`](http://nodejs.org/api/buffer.html) since Javascript does not support
-long integer natively.
+The id returned is a long integer stored in an 8 byte [`Buffer`](http://nodejs.org/api/buffer.html)
+since Javascript does not support long integer natively.
 
 **Example**
 
 ```javascript
-var client = zookeeper.createClient({...});
-var id = client.getSessionId();
-console.log('Session id is: %s', id.toString('hex'));
+const client = zk.createClient('127.0.0.1:2181')
+let id = client.getSessionId()
+console.log('Session id is: %s', id.toString('hex'))
 ```
 
 ---
@@ -571,14 +527,13 @@ console.log('Session id is: %s', id.toString('hex'));
 Returns the session password of this client instance. The value returned is not
 valid until the client connects to a server and may change after a re-connect.
 
-The value returned is an instance of
-[`Buffer`](http://nodejs.org/api/buffer.html).
+The value returned is an instance of [`Buffer`](http://nodejs.org/api/buffer.html).
 
 **Example**
 
 ```javascript
-var client = zookeeper.createClient({...});
-var pwd = client.getSessionPassword();
+const client = zk.createClient('127.0.0.1:2181')
+let pwd = client.getSessionPassword()
 ```
 
 ---
@@ -592,8 +547,8 @@ and may change after a re-connect.
 **Example**
 
 ```javascript
-var client = zookeeper.createClient({...});
-var sessionTimeout = client.getSessionTimeout();
+const client = zk.createClient('127.0.0.1:2181')
+let sessionTimeout = client.getSessionTimeout()
 ```
 
 ---
@@ -613,7 +568,7 @@ which interests you. The following is the list of events that can be watched:
 * `connected` - Client is connected and ready.
 * `connectedReadOnly` - Client is connected to a readonly server.
 * `disconnected` - The connection between client and server is dropped.
-* `expired` - The client session is expired.
+* `sessionExpired` - The client session is expired.
 * `authenticationFailed` - Failed to authenticate with the server.
 
 Note: some events (e.g. `connected` or `disconnected`) maybe be emitted more
@@ -622,9 +577,7 @@ than once during the client life cycle.
 **Example**
 
 ```javascript
-client.on('connected', function () {
-    console.log('Client state is changed to connected.');
-});
+client.on('connected', () => console.log('Client state is changed to connected.')
 ```
 
 2\. **Java client convention:** Register one event listener on the `state` event
@@ -639,11 +592,11 @@ instances:
 * `State.AUTH_FAILED` - Failed to authenticate with the server.
 
 ```javascript
-client.on('state', function (state) {
-    if (state === zookeeper.State.SYNC_CONNECTED) {
-        console.log('Client state is changed to connected.');
-    }
-});
+client.on('state', state => {
+  if (state === zk.State.SYNC_CONNECTED) {
+    console.log('Client state is changed to connected.')
+  }
+})
 ```
 
 ---
@@ -699,33 +652,25 @@ operations atomically.
 **Example**
 
 ```javascript
-var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
+const client = zk.createClient(process.argv[2] || 'localhost:2181');
 
-client.once('connected', function () {
-    client.transaction().
-        create('/txn').
-        create('/txn/1', new Buffer('transaction')).
-        setData('/txn/1', new Buffer('test'), -1).
-        check('/txn/1').
-        remove('/txn/1', -1).
-        remove('/txn').
-        commit(function (error, results) {
-            if (error) {
-                console.log(
-                    'Failed to execute the transaction: %s, results: %j',
-                    error,
-                    results
-                );
-
-                return;
-            }
-
-            console.log('Transaction completed.');
-            client.close();
-        });
-});
-
-client.connect();
+client.connect().then(()=>{
+  return client.transaction()
+    .create('/txn')
+    .create('/txn/1', Buffer.from('transaction'))
+    .setData('/txn/1', Buffer.from('test'), -1)
+    .check('/txn/1')
+    .remove('/txn/1', -1)
+    .remove('/txn')
+    .commit()
+})
+.then(results => {
+  console.log('Transaction completed.')
+  client.close()
+})
+.catch(error => {
+  console.log('Failed to execute the transaction: %s, results: %j', error.results)
+})
 ```
 
 #### Transaction create(path, [data], [acls], [mode])
@@ -787,13 +732,13 @@ Execute the transaction atomically.
 
 ---
 
-### Exception
+### ZkException
 
-If the requested operation fails due to reason related to ZooKeeper, the error
-which is passed into callback function will be an instance of `Exception` class.
+If the requested operation fails due to reason related to the ZooKeeper server, the error
+which the promise is rejected with will be an instance of `ZkException` class.
 
 The exception can be identified through its error code, the following is the
-list of error codes that are exported through `Exception` class.
+list of error codes that are exported through `ZkException` class.
 
 * `Exception.OK`
 * `Exception.SYSTEM_ERROR`
@@ -819,21 +764,20 @@ list of error codes that are exported through `Exception` class.
 **Example**
 
 ```javascript
-zookeeper.create('/test/demo', function (error, path) {
-    if (error) {
-        if (error.getCode() == zookeeper.Exception.NODE_EXISTS) {
-            console.log('Node exists.');
-        } else {
-            console.log(error.stack);
-        }
-        return;
-    }
-
-    console.log('Node: %s is created.', path);
-});
+zk.create('/test/demo')
+.catch(error => {
+  if (error.checkCode && error.checkCode('NODE_EXISTS')) return console.log('Node already exists')
+  console.log(error.stack)
+})
 ```
 
-#### Number getCode()
+#### Boolean `checkCode()`
+
+Return if the error code matches the String name or Integer code
+
+---
+
+#### Number `getCode()`
 
 Return the error code of the exception. 
 
@@ -842,7 +786,7 @@ Return the error code of the exception.
 #### String getPath()
 
 Return the associated node path of the exception. The path can be `undefined`
-if the exception is not related to node.
+if the exception is not related to a node.
 
 --
 
@@ -863,8 +807,8 @@ Return the exception in a readable string.
 
 This module depends on the following third-party libraries:
 
-* [async](https://github.com/caolan/async)
-* [underscore](http://underscorejs.org)
+* [bluebird](https://bluebirdjs.org)
+* [lodash](http://lodash.org)
 
 ## License
 
