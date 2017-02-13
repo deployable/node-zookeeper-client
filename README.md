@@ -3,12 +3,12 @@
 WIP
 
 A pure Javascript [ZooKeeper](http://zookeeper.apache.org) client module for
-[Node.js](http://nodejs.org). Cloned from https://github.com/alexguan/node-zookeeper-client and
-updated to use ES2015 and Promises.
+[Node.js](http://nodejs.org). Forked from https://github.com/alexguan/node-zookeeper-client and
+updated to use ES2015 and the client API has moved to using Promises.
 
 The module was originally designed to resemble the ZooKeeper Java client API but has been 
 tweaked a bit to fit with Node.js. Developers that are familiar with the ZooKeeper Java client
-would be able to pick it up quickly.
+should be able to pick it up quickly.
 
 This module has been tested to work with ZooKeeper version 3.4.*. Docker compose definitions
 of the test environments are included in the project.
