@@ -1,34 +1,16 @@
-/**
- * Copyright (c) 2013 Yahoo! Inc. All rights reserved.
- *
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file
- * for terms.
- */
+const zk = require('..')
+const client = zk.createClient(process.argv[2], { retries : 2 })
+const zkpath = process.argv[3]
+const data = Buffer.from(process.argv[4])
 
-var zookeeper = require('../index.js');
+console.log('Setting %s on %s to "%s"', client.connManager.connectionString.getConnectionString(), zkpath, data.toString())
+client.connect().then(() => {
+  console.log('Connected to the server.')
 
-var client = zookeeper.createClient(process.argv[2], { retries : 2 });
-var path = process.argv[3];
-var data = new Buffer(process.argv[4]);
+  return client.setData(zkpath, data).then(stat => {
+    console.log('Set data "%s" on node %s, version: %d.', data, zkpath, stat.version)
+  })
+  .finally(()=> client.close())
+})
 
-client.once('connected', function () {
-    console.log('Connected to the server.');
-
-    client.setData(path, data, function (error, stat) {
-        if (error) {
-            console.log('Got error when setting data: ' + error);
-            return;
-        }
-
-        console.log(
-            'Set data "%s" on node %s, version: %d.',
-            data.toString(),
-            path,
-            stat.version
-        );
-        client.close();
-    });
-});
-
-client.connect();
 

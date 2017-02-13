@@ -1,42 +1,24 @@
-/**
- * Copyright (c) 2013 Yahoo! Inc. All rights reserved.
- *
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file
- * for terms.
- */
+const zk = require('..')
+const client = zk.createClient(process.argv[2], { retries : 2 })
+const zkpath = process.argv[3]
 
-var zookeeper = require('../index.js');
-
-var client = zookeeper.createClient(process.argv[2], { retries : 2 });
-var path = process.argv[3];
-
-function getData(client, path) {
-    client.getData(
-        path,
-        function (event) {
-            console.log('Got event: %s', event);
-            getData(client, path);
-        },
-        function (error, data, stat) {
-            if (error) {
-                console.log('Error occurred when getting data: %s.', error);
-                return;
-            }
-
-            console.log(
-                'Node: %s has data: %s, version: %d',
-                path,
-                data ? data.toString() : undefined,
-                stat.version
-            );
-        }
-    );
+let watcher = (event) => {
+  console.log('Got event: %s', event)
+  getData(zkpath)
 }
 
-client.once('connected', function () {
-    console.log('Connected to ZooKeeper.');
-    getData(client, path);
-});
+function getData(node_path) {
+  return client.getData(node_path).then(res => {
+    console.log('Node: %s has data: %s, version: %d', node_path, res.data, res.stat.version)
+  })
+  .catch(error => {
+    console.log('Error occurred when getting data: %s.', error)
+  })
+}
 
-client.connect();
+client.connect().then(()=> {
+  console.log('Connected to ZooKeeper.')
+  getData(zkpath)
+})
+.finally(()=> client.close())
 
