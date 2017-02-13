@@ -5,47 +5,47 @@
  * for terms.
  */
 
-const {Exception} = require('../lib/Exception')
+const {ZkException} = require('../lib/errors')
 
 
-describe('Exception', function () {
+describe('Unit::ZkException', function () {
 
   describe('create', function () {
 
     it('should only accept number code', function () {
-      expect(()=> Exception.create('zzz') ).to.throw('Unknown Error code')
-      expect(()=> Exception.create() ).to.throw('Unknown Error code')
-      expect(()=> Exception.create(null) ).to.throw('Unknown Error code')
+      expect(()=> ZkException.create('zzz') ).to.throw('Unknown Error code')
+      expect(()=> ZkException.create() ).to.throw('Unknown Error code')
+      expect(()=> ZkException.create(null) ).to.throw('Unknown Error code')
     })
 
     it('should only accept predefined code', function () {
-      expect(()=> Exception.create(111111) ).to.throw('Unknown Error code')
-      expect(()=> Exception.create(-111111) ).to.throw('Unknown Error code')
+      expect(()=> ZkException.create(111111) ).to.throw('Unknown Error code')
+      expect(()=> ZkException.create(-111111) ).to.throw('Unknown Error code')
     })
 
     it('should return an instance of Error', function () {
-      let e = Exception.create(Exception.OK)
+      let e = ZkException.create(ZkException.OK)
       expect(e).to.be.instanceof(Error)
     })
 
-    it('should return an instance of Exception', function () {
-      let e = Exception.create(Exception.OK)
-      expect(e).to.be.instanceof(Exception)
+    it('should return an instance of ZkException', function () {
+      let e = ZkException.create(ZkException.OK)
+      expect(e).to.be.instanceof(ZkException)
     })
   })
 
   describe('getCode', function () {
 
     it('should return the given code.', function () {
-      let e = Exception.create(Exception.SYSTEM_ERROR)
-      expect(e.getCode()).to.equal(Exception.SYSTEM_ERROR)
+      let e = ZkException.create(ZkException.SYSTEM_ERROR)
+      expect(e.getCode()).to.equal(ZkException.SYSTEM_ERROR)
     })
   })
 
   describe('getName', function () {
 
     it('should return the correct name.', function () {
-      let e = Exception.create(Exception.SYSTEM_ERROR)
+      let e = ZkException.create(ZkException.SYSTEM_ERROR)
       expect(e.getName()).to.equal('SYSTEM_ERROR')
     })
   })
@@ -53,7 +53,7 @@ describe('Exception', function () {
   describe('getPath', function () {
 
     it('should return the correct path.', function () {
-      let e = Exception.create(Exception.SYSTEM_ERROR, '/test')
+      let e = ZkException.create(ZkException.SYSTEM_ERROR, '/test')
       expect(e.getPath()).to.equal('/test')
     })
   })
@@ -61,14 +61,14 @@ describe('Exception', function () {
   describe('toString', function () {
 
     it('should return the correctly formatted string.', function () {
-      let e1 = Exception.create(Exception.NO_NODE, '/test')
-      let e2 = Exception.create(Exception.NO_NODE)
+      let e1 = ZkException.create(ZkException.NO_NODE, '/test')
+      let e2 = ZkException.create(ZkException.NO_NODE)
 
       expect(e1.toString()).to.equal(
-        `Exception: NO_NODE[${Exception.NO_NODE}]@/test`
+        `ZkException: NO_NODE[${ZkException.NO_NODE}]@/test`
       )
       expect(e2.toString()).to.equal(
-        `Exception: NO_NODE[${Exception.NO_NODE}]`
+        `ZkException: NO_NODE[${ZkException.NO_NODE}]`
       )
     })
   })

@@ -7,7 +7,7 @@
 
 
 const Event = require('../lib/Event')
-const WatcherManager = require('../lib/WatcherManager')
+const {WatcherManager} = require('../lib/WatcherManager')
 
 
 describe('WatcherManager', function(){

@@ -25,7 +25,7 @@ const Id                = require('./lib/Id')
 const Event             = require('./lib/Event')
 const State             = require('./lib/State')
 const CreateMode        = require('./lib/CreateMode')
-const Exception         = require('./lib/Exception')
+const { ZkError, ZkException } = require('./lib/errors')
 
 const { CLIENT_DEFAULT_OPTIONS } = require('./lib/constants')
 
@@ -40,7 +40,8 @@ function createClient(connectionString, options) {
 }
 
 module.exports = {
-  ACL, Client, Id, Permission, CreateMode, State, Event, Exception,
+  ACL, Client, Id, Permission, CreateMode, State, Event,
+  ZkException, ZkError,
   CLIENT_DEFAULT_OPTIONS,
   createClient
 }
