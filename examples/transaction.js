@@ -1,38 +1,19 @@
-/**
- * Copyright (c) 2013 Yahoo! Inc. All rights reserved.
- *
- * Copyrights licensed under the MIT License. See the accompanying LICENSE file
- * for terms.
- */
+const zk = require('..')
+const client = zk.createClient(process.argv[2] || 'localhost:2181')
 
-var zookeeper = require('../index.js');
+client.connect().then(() => {
+  console.log('Connected to the server')
 
-var client = zookeeper.createClient(process.argv[2] || 'localhost:2181');
+  return client.transaction()
+    .create('/txn')
+    .create('/txn/1', Buffer.from('transaction'))
+    .setData('/txn/1', Buffer.from('test'), { version: -1 })
+    .check('/txn/1')
+    .remove('/txn/1', -1)
+    .remove('/txn')
+    .commit()
+    .then(results => console.log('Transaction completed', results))
+    .catch(error => console.log('Failed to execute the transaction: %s, results: %j', error.stack, error.results))
+})
+.finally(() => client.close())
 
-client.once('connected', function () {
-    console.log('Connected to the server.');
-
-    client.transaction().
-        create('/txn').
-        create('/txn/1', new Buffer('transaction')).
-        setData('/txn/1', new Buffer('test'), -1).
-        check('/txn/1').
-        remove('/txn/1', -1).
-        remove('/txn').
-        commit(function (error, results) {
-            if (error) {
-                console.log(
-                    'Failed to execute the transaction: %s, results: %j',
-                    error,
-                    results
-                );
-
-                return;
-            }
-
-            console.log('Transaction completed.');
-            client.close();
-        });
-});
-
-client.connect();
