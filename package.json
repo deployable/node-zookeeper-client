@@ -15,7 +15,7 @@
     "url": "https://github.com/deployable/zk-client"
   },
   "scripts": {
-    "start:docker": "docker-compose up -d --force-recreate",
+    "start:docker": "docker-compose up -d --force-recreate zookeeper && docker-compose up zookeeper_wait",
     "test": "set -uex; yarn run test:mocha; yarn run test:eslint; yarn run test:coverage",
     "test:eslint": "eslint index.js lib/*.js lib/jute/*.js",
     "test:mocha": "set -uex; yarn run test:unit; yarn run test:int",

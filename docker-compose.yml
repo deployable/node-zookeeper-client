@@ -3,19 +3,27 @@ version: "2.1"
 services:
 
   zookeeper:
-    image: 'deployable/kafka:latest'
-    command: zookeeper
+    image: 'deployable/zookeeper:latest'
     ports:
      - "2183:2181"
     networks:
      - node-zookeeper-client
-    healthcheck:
-      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
-      interval: 15s
-      timeout: 4s
-      retries: 3
+
+  zookeeper_wait:
+    image: 'deployable/zookeeper:latest'
+    networks:
+     - node-zookeeper-client
+    environment:
+      PORT: 2181
+      HOST: zookeeper
+    command: [ "/zookeeper/wait.sh", "zookeeper" ]
 
 networks:
   'node-zookeeper-client':
     driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.239.0/24
+        gateway: 172.16.239.1
 

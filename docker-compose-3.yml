@@ -3,45 +3,47 @@ version: "2.1"
 services:
 
   zookeeper1:
-    image: 'deployable/kafka:latest'
-    command: zookeeper
-    ports:
-     - "2183:2181"
-    networks:
-     - node-zookeeper-client
-    healthcheck:
-      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-
-  zookeeper2:
-    image: 'deployable/kafka:latest'
-    command: zookeeper
+    image: 'deployable/zookeeper:latest'
+    environment:
+      ZK_MYID: 1
     ports:
      - "2184:2181"
     networks:
-     - node-zookeeper-client
-    healthcheck:
-      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+     node-zookeeper-client:
+       ipv4_address: 172.16.239.21
+    volumes:
+      - './zoo.cfg:/zookeeper/conf/zoo.cfg:ro'
 
-  zookeeper3:
-    image: 'deployable/kafka:latest'
-    command: zookeeper
+  zookeeper2:
+    image: 'deployable/zookeeper:latest'
+    environment:
+      ZK_MYID: 2
     ports:
      - "2185:2181"
     networks:
-     - node-zookeeper-client
-    healthcheck:
-      test: [ "CMD", "/kafka/check.sh", "zookeeper" ]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+     node-zookeeper-client:
+       ipv4_address: 172.16.239.22
+    volumes:
+      - './zoo.cfg:/zookeeper/conf/zoo.cfg:ro'
+
+  zookeeper3:
+    image: 'deployable/zookeeper:latest'
+    environment:
+      ZK_MYID: 3
+    ports:
+     - "2186:2181"
+    networks:
+      node-zookeeper-client:
+        ipv4_address: 172.16.239.23
+    volumes:
+      - './zoo.cfg:/zookeeper/conf/zoo.cfg:ro'
 
 networks:
   'node-zookeeper-client':
     driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.239.0/24
+        gateway: 172.16.239.1
 
